@@ -39,7 +39,10 @@ export function ArcCarousel({ works, ready = true, paused = false }: { works: Wo
   const lock = useRef(0);
   const acc = useRef(0);
   const idle = useRef<ReturnType<typeof setTimeout>>(undefined);
-  const drag = useRef<{ x: number; moved: boolean } | null>(null);
+  const drag = useRef<{ x: number; t: number; dx: number; moved: boolean } | null>(null);
+  const arc = useRef<HTMLDivElement>(null);
+  const [dragX, setDragX] = useState(0);
+  const [dragging, setDragging] = useState(false);
 
   // Any input from the visitor pauses autoplay until they've been idle a while.
   const touched = useCallback(() => {
@@ -101,15 +104,46 @@ export function ArcCarousel({ works, ready = true, paused = false }: { works: Wo
   return (
     <main
       className={`home${ready ? " is-ready" : ""}${entered ? " is-entered" : ""}`}
-      onPointerDown={(e) => (drag.current = { x: e.clientX, moved: false })}
+      // Swipe / drag: the arc follows the finger, then settles on the nearest piece.
+      onPointerDown={(e) => {
+        if (paused || (e.pointerType === "mouse" && e.button !== 0)) return;
+        drag.current = { x: e.clientX, t: performance.now(), dx: 0, moved: false };
+      }}
       onPointerMove={(e) => {
         const d = drag.current;
-        if (d && Math.abs(e.clientX - d.x) > 40 && !d.moved) {
+        if (!d) return;
+        d.dx = e.clientX - d.x;
+        if (!d.moved && Math.abs(d.dx) > 8) {
           d.moved = true;
-          step(e.clientX < d.x ? 1 : -1);
+          setDragging(true);
+          // Capture only once it's a drag, so plain taps still click the artworks.
+          e.currentTarget.setPointerCapture(e.pointerId);
         }
+        if (d.moved) setDragX(d.dx);
       }}
-      onPointerUp={() => setTimeout(() => (drag.current = null), 0)}
+      onPointerUp={() => {
+        const d = drag.current;
+        if (d?.moved) {
+          const card = arc.current?.querySelector<HTMLElement>(".arc__item")?.offsetWidth ?? 240;
+          const speed = d.dx / Math.max(1, performance.now() - d.t); // px per ms
+          let by = Math.round(-d.dx / (card * 0.75));
+          if (by === 0 && (Math.abs(d.dx) > 36 || Math.abs(speed) > 0.35)) by = d.dx < 0 ? 1 : -1;
+          by = Math.max(-3, Math.min(3, by));
+          if (by) {
+            touched();
+            setActive((a) => a + by);
+          }
+        }
+        setDragX(0);
+        setDragging(false);
+        // Let the click that follows a drag see `moved`, then reset.
+        setTimeout(() => (drag.current = null), 0);
+      }}
+      onPointerCancel={() => {
+        drag.current = null;
+        setDragX(0);
+        setDragging(false);
+      }}
     >
       <div className="home__info">
         <div key={`l${current.slug}`} className="swap">
@@ -131,7 +165,12 @@ export function ArcCarousel({ works, ready = true, paused = false }: { works: Wo
         </div>
       </div>
 
-      <div className="arc" role="list">
+      <div
+        ref={arc}
+        className="arc"
+        role="list"
+        style={{ transform: `translateX(${dragX * 0.7}px)`, transition: dragging ? "none" : "transform 0.6s var(--ease)" }}
+      >
         {slots.map((w, i) => {
           const d = mod(i - active + Math.floor(L / 2), L) - Math.floor(L / 2);
           const visible = Math.abs(d) <= 3;
@@ -160,7 +199,10 @@ export function ArcCarousel({ works, ready = true, paused = false }: { works: Wo
         })}
       </div>
 
-      <p className="home__hint">Scroll, drag or click to explore</p>
+      <p className="home__hint">
+        <span className="hint-mouse">Scroll, drag or click to explore</span>
+        <span className="hint-touch">Swipe to explore · tap to open</span>
+      </p>
     </main>
   );
 }
