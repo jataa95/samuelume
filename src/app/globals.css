@@ -219,7 +219,7 @@ p {
   to { transform: scaleX(1); }
 }
 
-/* ---------- Home: film (preloader → hero background → lightbox) ---------- */
+/* ---------- Home: film (preloader → hero background) ---------- */
 .film {
   position: fixed;
   inset: 0;
@@ -289,40 +289,6 @@ p {
 .no-intro .film__intro {
   display: none;
 }
-.film__watch {
-  position: fixed;
-  z-index: 40;
-  top: calc(var(--pad) + 140px);
-  right: var(--pad);
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  font: inherit;
-  font-size: 12px;
-  color: var(--paper);
-  background: none;
-  border: 0;
-  padding: 0;
-  cursor: pointer;
-  animation: fade 1s var(--ease) both 0.8s;
-}
-.film__watch i {
-  display: grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  border: 1px solid rgba(241, 239, 233, 0.45);
-  border-radius: 50%;
-  font-style: normal;
-  font-size: 9px;
-  padding-left: 2px;
-  transition: background 0.3s, color 0.3s;
-}
-.film__watch:hover i {
-  background: var(--paper);
-  color: var(--ink);
-}
-
 /* Home sits on the film, so its text flips to off-white. */
 .home {
   z-index: 1;
@@ -453,50 +419,6 @@ p {
 @keyframes rise {
   from { opacity: 0; transform: translateY(24px); filter: blur(6px); }
 }
-.lightbox {
-  position: fixed;
-  inset: 0;
-  z-index: 150;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  padding: var(--pad);
-  background: rgba(12, 12, 11, 0.98);
-  color: var(--paper);
-  animation: fade 0.4s var(--ease) both;
-}
-.lightbox video {
-  max-height: 80svh;
-  max-width: 100%;
-  aspect-ratio: 9 / 16;
-  background: #000;
-}
-.lightbox__meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 24px;
-  width: min(100%, calc(80svh * 9 / 16));
-  font-size: 15px;
-}
-.lightbox__meta button {
-  font: inherit;
-  font-size: 12px;
-  color: var(--muted-dark);
-  background: none;
-  border: 0;
-  padding: 0;
-  cursor: pointer;
-  white-space: nowrap;
-}
-.lightbox__meta button:hover {
-  color: var(--paper);
-}
-@keyframes fade {
-  from { opacity: 0; }
-}
 .swap {
   animation: swap 0.7s var(--ease) both;
 }
@@ -619,7 +541,6 @@ p {
   .home__cat { font-size: 15px; color: var(--muted); }
   .home__count { display: none; }
   .home__excerpt { max-width: calc(100vw - 2 * var(--pad) - 96px); }
-  .film__watch { top: auto; right: auto; left: var(--pad); bottom: 112px; }
 }
 
 .hint-touch { display: none; }

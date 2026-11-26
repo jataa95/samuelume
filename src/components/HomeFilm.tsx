@@ -15,15 +15,13 @@ const NAME_AT = 8.8;
 /**
  * A short film of the process opens the home page full-screen, act by act,
  * then stays on as the darkened, looping hero background behind the
- * carousel. "Watch the process film" plays a full process video in a lightbox.
+ * carousel.
  */
-export function HomeFilm({ onReady, onLightbox }: { onReady: () => void; onLightbox: (open: boolean) => void }) {
+export function HomeFilm({ onReady }: { onReady: () => void }) {
   const [phase, setPhase] = useState<"intro" | "bg">("intro");
   const [stage, setStage] = useState(0); // 0-2 = acts, 3 = name
-  const [open, setOpen] = useState(false);
   const film = useRef<HTMLVideoElement>(null);
   const bar = useRef<HTMLSpanElement>(null);
-  const full = useRef<HTMLVideoElement>(null);
 
   // Skip the intro on repeat visits in a session, and for reduced motion
   // (layout.tsx adds `no-intro` to <html> before first paint in those cases).
@@ -76,20 +74,6 @@ export function HomeFilm({ onReady, onLightbox }: { onReady: () => void; onLight
       else v.play().catch(() => {});
     }
   }, [phase, onReady]);
-
-  useEffect(() => {
-    onLightbox(open);
-    if (!open) return;
-    const bg = film.current;
-    full.current?.play().catch(() => {});
-    bg?.pause();
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
-    window.addEventListener("keydown", onKey);
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      bg?.play().catch(() => {});
-    };
-  }, [open, onLightbox]);
 
   const onTime = () => {
     const t = film.current?.currentTime ?? 0;
@@ -151,23 +135,6 @@ export function HomeFilm({ onReady, onLightbox }: { onReady: () => void; onLight
         </div>
       </div>
 
-      {phase === "bg" && (
-        <button className="film__watch" onClick={() => setOpen(true)}>
-          <i aria-hidden>▶</i> Watch the process film
-        </button>
-      )}
-
-      {open && (
-        <div className="lightbox" role="dialog" aria-modal="true" aria-label="Process film: Hadassah" onClick={() => setOpen(false)}>
-          <video ref={full} src="/video/hadassah-process.mp4" poster="/video/hadassah-process.jpg" controls muted playsInline onClick={(e) => e.stopPropagation()} />
-          <div className="lightbox__meta">
-            <p className="serif">Hadassah, from sketch to flame to colour</p>
-            <button onClick={() => setOpen(false)} autoFocus>
-              Close ✕
-            </button>
-          </div>
-        </div>
-      )}
     </>
   );
 }
