@@ -26,7 +26,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{if(sessionStorage.getItem("su-intro")||matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.classList.add("no-intro")}catch(e){}`,
+            __html: `try{var h=document.documentElement;if(sessionStorage.getItem("su-intro")||matchMedia("(prefers-reduced-motion: reduce)").matches)h.classList.add("no-intro");else if(location.pathname==="/")h.classList.add("is-intro")}catch(e){}`,
           }}
         />
       </head>

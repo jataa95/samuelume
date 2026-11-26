@@ -14,14 +14,13 @@ const NAME_AT = 13.2;
 
 /**
  * A short film of the process opens the home page full-screen, act by act,
- * then docks into a small looping tile. Clicking the tile plays a full
- * process film in a lightbox.
+ * then stays on as the darkened, looping hero background behind the
+ * carousel. "Watch the process film" plays a full process video in a lightbox.
  */
 export function HomeFilm({ onReady, onLightbox }: { onReady: () => void; onLightbox: (open: boolean) => void }) {
-  const [phase, setPhase] = useState<"intro" | "docked">("intro");
+  const [phase, setPhase] = useState<"intro" | "bg">("intro");
   const [stage, setStage] = useState(0); // 0-2 = acts, 3 = name
   const [open, setOpen] = useState(false);
-  const [instant, setInstant] = useState(false);
   const film = useRef<HTMLVideoElement>(null);
   const bar = useRef<HTMLSpanElement>(null);
   const full = useRef<HTMLVideoElement>(null);
@@ -33,15 +32,13 @@ export function HomeFilm({ onReady, onLightbox }: { onReady: () => void; onLight
     try {
       sessionStorage.setItem("su-intro", "1");
     } catch {}
-    const dock = () => setPhase("docked");
+    const dock = () => setPhase("bg");
     if (skip) {
-      const t0 = setTimeout(() => {
-        setInstant(true);
-        dock();
-      }, 0);
+      const t0 = setTimeout(dock, 0);
       return () => clearTimeout(t0);
     }
 
+    document.documentElement.classList.add("is-intro");
     const v = film.current;
     let raf = 0;
     const tick = () => {
@@ -58,6 +55,7 @@ export function HomeFilm({ onReady, onLightbox }: { onReady: () => void; onLight
     window.addEventListener("wheel", early, { once: true, passive: true });
     window.addEventListener("keydown", early, { once: true });
     return () => {
+      document.documentElement.classList.remove("is-intro");
       cancelAnimationFrame(raf);
       clearTimeout(fallback);
       window.removeEventListener("wheel", early);
@@ -66,27 +64,30 @@ export function HomeFilm({ onReady, onLightbox }: { onReady: () => void; onLight
   }, []);
 
   useEffect(() => {
-    if (phase !== "docked") return;
+    if (phase !== "bg") return;
+    document.documentElement.classList.remove("is-intro");
     onReady();
     const v = film.current;
     if (v) {
       v.loop = true;
       if (v.ended) v.currentTime = 0;
-      v.play().catch(() => {});
+      // Keep a still background for visitors who prefer reduced motion.
+      if (matchMedia("(prefers-reduced-motion: reduce)").matches) v.pause();
+      else v.play().catch(() => {});
     }
   }, [phase, onReady]);
 
   useEffect(() => {
     onLightbox(open);
     if (!open) return;
-    const tile = film.current;
+    const bg = film.current;
     full.current?.play().catch(() => {});
-    tile?.pause();
+    bg?.pause();
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
     window.addEventListener("keydown", onKey);
     return () => {
       window.removeEventListener("keydown", onKey);
-      tile?.play().catch(() => {});
+      bg?.play().catch(() => {});
     };
   }, [open, onLightbox]);
 
@@ -100,13 +101,8 @@ export function HomeFilm({ onReady, onLightbox }: { onReady: () => void; onLight
 
   return (
     <>
-      <div className={`film film--${phase}${instant ? " film--instant" : ""}`}>
-        <button
-          className="film__frame"
-          onClick={() => (phase === "docked" ? setOpen(true) : setPhase("docked"))}
-          tabIndex={phase === "docked" ? 0 : -1}
-          aria-label={phase === "docked" ? "Watch the process film" : "Skip intro"}
-        >
+      <div className={`film film--${phase}`}>
+        <button className="film__frame" onClick={() => setPhase("bg")} tabIndex={-1} aria-label="Skip intro">
           <video
             ref={film}
             src="/video/intro-film.mp4"
@@ -115,22 +111,15 @@ export function HomeFilm({ onReady, onLightbox }: { onReady: () => void; onLight
             playsInline
             preload="auto"
             onTimeUpdate={phase === "intro" ? onTime : undefined}
-            onEnded={() => setPhase("docked")}
+            onEnded={() => setPhase("bg")}
             aria-hidden
           />
-          <span className="film__play" aria-hidden>
-            ▶
-          </span>
         </button>
-        <span className="film__label">
-          Painting with fire
-          <br />
-          <span className="muted">Watch the process</span>
-        </span>
+        <div className="film__shade" aria-hidden />
 
         <div className="film__intro" aria-hidden={phase !== "intro"}>
           <p className="film__brand serif">{site.name}</p>
-          <button className="film__skip" onClick={() => setPhase("docked")} tabIndex={phase === "intro" ? 0 : -1}>
+          <button className="film__skip" onClick={() => setPhase("bg")} tabIndex={phase === "intro" ? 0 : -1}>
             Skip intro →
           </button>
 
@@ -161,6 +150,12 @@ export function HomeFilm({ onReady, onLightbox }: { onReady: () => void; onLight
           </div>
         </div>
       </div>
+
+      {phase === "bg" && (
+        <button className="film__watch" onClick={() => setOpen(true)}>
+          <i aria-hidden>▶</i> Watch the process film
+        </button>
+      )}
 
       {open && (
         <div className="lightbox" role="dialog" aria-modal="true" aria-label="Process film: Hadassah" onClick={() => setOpen(false)}>
