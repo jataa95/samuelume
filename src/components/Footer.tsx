@@ -1,7 +1,9 @@
 import { site } from "@/content/site";
+import OjdznCredit from "./OjdznCredit";
 
 export function Footer() {
   return (
+    <>
     <footer className="footer dark">
       <div className="footer__top">
         <div>
@@ -39,5 +41,7 @@ export function Footer() {
         <span>Made with fire &amp; acrylic</span>
       </div>
     </footer>
+    <OjdznCredit from="samuelume" />
+    </>
   );
 }
