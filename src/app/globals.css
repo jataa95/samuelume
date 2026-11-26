@@ -263,7 +263,7 @@ p {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: brightness(0.5) contrast(1.05);
+  filter: brightness(0.58) contrast(1.06);
   transition: filter 1.2s var(--ease), transform 1s var(--ease);
 }
 .film--docked .film__frame video {
@@ -329,18 +329,101 @@ p {
 .film--docked .film__intro {
   opacity: 0;
 }
-.film__name {
-  font-size: clamp(54px, 10vw, 168px);
-  line-height: 0.9;
-  letter-spacing: -0.02em;
-  animation: rise 1.4s var(--ease) both 0.15s;
+.film__brand {
+  position: absolute;
+  top: calc(var(--pad) - 2px);
+  left: var(--pad);
+  font-size: 15px;
 }
+.film__skip {
+  position: absolute;
+  top: var(--pad);
+  right: var(--pad);
+  pointer-events: auto;
+  font: inherit;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--paper);
+  background: rgba(12, 12, 11, 0.35);
+  border: 1px solid rgba(241, 239, 233, 0.3);
+  padding: 8px 14px;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  transition: background 0.3s;
+}
+.film__skip:hover {
+  background: rgba(12, 12, 11, 0.6);
+}
+.film__act {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.film__act > * {
+  animation: rise 1.1s var(--ease) both;
+}
+.film__act > :nth-child(2) { animation-delay: 0.08s; }
+.film__act > :nth-child(3) { animation-delay: 0.2s; }
+.film__num {
+  font-size: 15px;
+  font-style: italic;
+  color: #d8d4ca;
+}
+.film__word {
+  font-size: clamp(64px, 12vw, 190px);
+  line-height: 0.88;
+  letter-spacing: -0.03em;
+  font-style: italic;
+}
+.film__note,
 .film__tag {
   font-size: 12px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: #d8d4ca;
-  animation: rise 1.4s var(--ease) both 0.45s;
+}
+.film__name {
+  font-size: clamp(56px, 10vw, 168px);
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+}
+.film__track {
+  position: absolute;
+  left: var(--pad);
+  right: var(--pad);
+  bottom: max(var(--pad), env(safe-area-inset-bottom));
+}
+.film__chapters {
+  position: relative;
+  height: 18px;
+  margin-bottom: 10px;
+}
+.film__chapters span {
+  position: absolute;
+  bottom: 0;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: rgba(241, 239, 233, 0.45);
+  transition: color 0.5s var(--ease);
+}
+.film__chapters span.is-on {
+  color: var(--paper);
+}
+.film__bar {
+  display: block;
+  position: relative;
+  height: 1px;
+  background: rgba(241, 239, 233, 0.22);
+}
+.film__bar span {
+  position: absolute;
+  inset: 0;
+  background: var(--paper);
+  transform: scaleX(0);
+  transform-origin: left;
 }
 @keyframes rise {
   from { opacity: 0; transform: translateY(24px); filter: blur(6px); }
