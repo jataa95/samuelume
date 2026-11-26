@@ -4,13 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import { site } from "@/content/site";
 
 /** Act boundaries inside /video/intro-film.mp4 (seconds). Update if the film is re-cut. */
-const FILM_LENGTH = 15.8;
+const FILM_LENGTH = 10.53;
 const ACTS = [
   { at: 0, n: "I", word: "Line.", note: "Graphite on raw canvas" },
-  { at: 3.6, n: "II", word: "Flame.", note: "Torch and palette knife" },
-  { at: 9.6, n: "III", word: "Colour.", note: "Acrylic, last of all" },
+  { at: 2.4, n: "II", word: "Flame.", note: "Torch and palette knife" },
+  { at: 6.4, n: "III", word: "Colour.", note: "Acrylic, last of all" },
 ];
-const NAME_AT = 13.2;
+const NAME_AT = 8.8;
 
 /**
  * A short film of the process opens the home page full-screen, act by act,
